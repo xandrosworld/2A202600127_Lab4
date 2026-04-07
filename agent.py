@@ -74,6 +74,8 @@ if __name__ == "__main__":
     print("   Go 'quit' de thoat")
     print("=" * 60)
 
+    conversation_history = []  # Lưu toàn bộ lịch sử hội thoại
+
     while True:
         user_input = input("\nBan: ").strip()
         if user_input.lower() in ("quit", "exit", "q"):
@@ -84,6 +86,15 @@ if __name__ == "__main__":
             continue
 
         print("\n[TravelBuddy dang suy nghi...]")
-        result = graph.invoke({"messages": [("human", user_input)]})
+
+        # Thêm tin nhắn mới vào lịch sử
+        conversation_history.append(("human", user_input))
+
+        # Gửi toàn bộ lịch sử để agent có context
+        result = graph.invoke({"messages": conversation_history})
+
+        # Lưu lại toàn bộ messages (bao gồm tool calls + replies)
+        conversation_history = result["messages"]
+
         final = result["messages"][-1]
         print(f"\nTravelBuddy: {final.content}")
