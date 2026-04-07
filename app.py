@@ -12,6 +12,7 @@ from typing_extensions import TypedDict
 from langchain_core.messages import BaseMessage
 from tools import search_flights, search_hotels, calculate_budget, get_weather, search_activities
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
 
@@ -184,7 +185,10 @@ def build_agent():
         system_prompt = f.read()
 
     tools_list = [search_flights, search_hotels, calculate_budget, get_weather, search_activities]
-    llm = ChatAnthropic(model="claude-sonnet-4-5")
+    llm = ChatAnthropic(
+        model="claude-sonnet-4-5",
+        api_key=os.environ.get("ANTHROPIC_API_KEY"),
+    )
     llm_with_tools = llm.bind_tools(tools_list)
 
     class AgentState(TypedDict):
