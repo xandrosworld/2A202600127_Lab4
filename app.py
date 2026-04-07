@@ -180,14 +180,14 @@ with st.sidebar:
 
 # ── Build agent (cached) ──────────────────────────────────────
 @st.cache_resource
-def build_agent():
+def build_agent(api_key: str):
     with open("system_prompt.txt", "r", encoding="utf-8") as f:
         system_prompt = f.read()
 
     tools_list = [search_flights, search_hotels, calculate_budget, get_weather, search_activities]
     llm = ChatAnthropic(
         model="claude-sonnet-4-5",
-        api_key=os.environ.get("ANTHROPIC_API_KEY"),
+        api_key=api_key,
     )
     llm_with_tools = llm.bind_tools(tools_list)
 
@@ -209,7 +209,12 @@ def build_agent():
     builder.add_edge("tools", "agent")
     return builder.compile()
 
-graph = build_agent()
+api_key = os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("anthropic_api_key")
+if not api_key:
+    st.error("⚠️ Thiếu ANTHROPIC_API_KEY! Vui lòng set biến môi trường trong Railway → Variables.")
+    st.stop()
+
+graph = build_agent(api_key)
 
 # ── Session state ─────────────────────────────────────────────
 if "messages" not in st.session_state:
